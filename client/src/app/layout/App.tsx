@@ -1,7 +1,7 @@
-import Catalog from "../../features/catalog/Catalog";
 import { Container, CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import TopBar from "./TopBar";
 import { useState } from "react";
+import { Outlet } from "react-router-dom";
 
 function App() {
     const [darkMode, setDarkMode] = useState(false)
@@ -10,7 +10,6 @@ function App() {
         palette: {
             mode: paletteType,
             background: {
-
                 default: paletteType === 'light' ? "#eaeaea" : "#121212"
             }
         }
@@ -21,10 +20,10 @@ function App() {
     return (
         <>
             <ThemeProvider theme={theme}>
-                <CssBaseline></CssBaseline>
+                <CssBaseline></CssBaseline> 
                 <TopBar darkMode={darkMode} themeChange={handleThemeChange}></TopBar>
                 <Container>
-                    <Catalog></Catalog>
+                    <Outlet></Outlet>
                 </Container>
             </ThemeProvider>
 
