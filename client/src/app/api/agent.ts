@@ -6,6 +6,7 @@ import { router } from "../router/Routes";
 const delay = () => new Promise(resolve => setTimeout(resolve, 500));
 
 axios.defaults.baseURL = 'http://localhost:5000/api/';
+axios.defaults.withCredentials = true;
 
 const responseBody = (respons: AxiosResponse) => respons.data;
 
@@ -31,7 +32,7 @@ axios.interceptors.response.use(async response => {
             toast.error(data.title);
             break;
         case 500:
-            router.navigate('/server-error', { state: {error: data}})
+            router.navigate('/server-error', { state: { error: data } })
             break;
         default:
             break;
@@ -41,7 +42,7 @@ axios.interceptors.response.use(async response => {
 
 const requests = {
     get: (url: string) => axios.get(url).then(responseBody),
-    post: (url: string, body: object) => axios.get(url, body).then(responseBody),
+    post: (url: string, body: object) => axios.post(url, body).then(responseBody),
     put: (url: string, body: object) => axios.get(url, body).then(responseBody),
     delete: (url: string) => axios.get(url).then(responseBody)
 }
@@ -61,9 +62,16 @@ const TestErrors = {
 
 }
 
+const Cart = {
+    get: () => requests.get('cart'),
+    addItem: (productId: number, quantity = 1) => requests.post(`cart?productId=${productId}&quantity=${quantity}`, {}),
+    removeItem: (productId: number, quantity = 1) => requests.delete(`cart?productId=${productId}&quantity=${quantity}`)
+}
+
 const agent = {
     TestErrors,
-    Catalog
+    Catalog,
+    Cart
 }
 
 export default agent;
