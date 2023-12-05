@@ -1,26 +1,27 @@
-import { Container, CssBaseline, ThemeProvider, createTheme, useStepContext } from "@mui/material";
+import { Container, CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import TopBar from "./TopBar";
 import { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css'
-import { useStoreContext } from "../context/StoreContext";
 import { getCookie } from "../util/util";
 import agent from "../api/agent";
 import LoadingComponent from "./LoadingComponent";
+import { useAppDispatch } from "../store/configureStore";
+import { setCart } from "../../features/cart/cartSlice";
 
 function App() {
 
-    const { setCart } = useStoreContext();
+    const dispatch = useAppDispatch()
     const [loading, setLoading] = useState(true);
 
 
     useEffect(() => {
         const customerId = getCookie('customerId');
         if (customerId) {
-            agent.Cart.get().then(cart => setCart(cart)).catch(error => console.log(error)).finally(() => setLoading(false))
+            agent.Cart.get().then(cart => dispatch(setCart(cart))).catch(error => console.log(error)).finally(() => setLoading(false))
         } else { setLoading(false) }
-    }, [setCart])
+    }, [dispatch])
 
     const [darkMode, setDarkMode] = useState(false)
     const paletteType = darkMode ? 'dark' : 'light'

@@ -1,22 +1,21 @@
 import { Divider, Grid, Table, TableBody, TableCell, TableContainer, TableFooter, TableRow, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Product } from "../../app/models/product";
-import agent from "../../app/api/agent";
 import NotFound from "../../app/errors/NotFound";
 import LoadingComponent from "../../app/layout/LoadingComponent";
-import { useStoreContext } from "../../app/context/StoreContext";
 import { LoadingButton } from "@mui/lab";
+import { useAppSelector } from "../../app/store/configureStore";
+import { useDispatch } from "react-redux";
+import { addCartItemAsync, removeCartItemAsync } from "../cart/cartSlice";
+import { getProductAsync, productsSelectors } from "./catalogSlice";
 export default function ProductDetails() {
 
     const { id } = useParams<{ id: string }>();
-
-    const { cart, setCart, removeItem } = useStoreContext();
-
-    const [product, setProduct] = useState<Product | null>(null);
-    const [loading, setLoading] = useState(true);
+    const { cart, status } = useAppSelector(state => state.cart);
+    const {status: productStatus } = useAppSelector(state => state.catalog)
+    const dispatch = useDispatch();
+    const product = useAppSelector(state => productsSelectors.selectById(state, id!))
     const [quantity, setQuantity] = useState(0);
-    const [submitting, setSubmitting] = useState(false);
 
     const item = cart?.cartItems.find(x => x.productId === product?.id);
 
@@ -27,11 +26,9 @@ export default function ProductDetails() {
             setQuantity(item.quantity);
         }
 
-        id && agent.Catalog.details(parseInt(id))
-            .then(response => setProduct(response))
-            .catch(error => console.log(error))
-            .finally(() => setLoading(false))
-    }, [id, item])
+        if (!product && id) dispatch(getProductAsync(parseInt(id)))
+
+    }, [id, item,dispatch,product])
 
 
     function handleInputChange(event: any) {
@@ -41,23 +38,22 @@ export default function ProductDetails() {
     }
 
     function handleUpdateCart() {
-        setSubmitting(true);
+
         if (!item || quantity > item.quantity) {
             const updatedQuantity = item ? quantity - item.quantity : quantity;
-            agent.Cart.addItem(product?.id!, updatedQuantity)
-                .then(cart => setCart(cart))
-                .catch(error => console.log(error))
-                .finally(() => setSubmitting(false))
+            dispatch(addCartItemAsync({ productId: product?.id!, quantity: updatedQuantity }))
         } else {
             const updatedQuantity = item.quantity - quantity;
-            agent.Cart.removeItem(product?.id!, updatedQuantity)
-                .then(() => removeItem(product?.id!, updatedQuantity))
-                .catch((error) => console.log(error))
-                .finally(() => setSubmitting(false))
+            //agent.Cart.removeItem(product?.id!, updatedQuantity)
+            //    .then(() => dispatch(removeItem({ productId: product?.id!, quantity: updatedQuantity })))
+            //    .catch((error) => console.log(error))
+            //    .finally(() => setSubmitting(false))
+
+            dispatch(removeCartItemAsync({productId:product?.id!, quantity: updatedQuantity}))
         }
     }
 
-    if (loading) return <LoadingComponent message='Loading product...'></LoadingComponent>
+    if (productStatus.includes('pending')) { return <LoadingComponent message='Loading product...'></LoadingComponent> }
     if (!product) return <NotFound></NotFound>
 
     return (
@@ -107,7 +103,14 @@ export default function ProductDetails() {
                         <TextField type='number' variant='outlined' label=' Quantity in Cart' fullWidth value={quantity} onChange={handleInputChange} >
                         </TextField></Grid>
                     <Grid item xs={6}>
-                        <LoadingButton disabled={item?.quantity === quantity || !item && quantity === 0} loading={submitting} onClick={handleUpdateCart} sx={{ height: '55px' }} color='primary' size='large' variant='contained' fullWidth>
+                        <LoadingButton
+                            disabled={item?.quantity === quantity || !item && quantity === 0}
+                            loading={status.includes('pending')}
+                            onClick={handleUpdateCart} sx={{ height: '55px' }}
+                            color='primary'
+                            size='large'
+                            variant='contained'
+                            fullWidth>
                             {item ? 'Update Quantity' : 'Add to Cart'}
                         </LoadingButton></Grid>
                 </Grid>

@@ -1,3 +1,6 @@
+//LEGACY CODE WILL BE DELETED
+
+
 import { PropsWithChildren, createContext, useContext, useState } from "react";
 import { Cart } from "../models/basket";
 

@@ -66,7 +66,7 @@ namespace API.Controllers
 
             var cart = await _context.Carts.Include(i => i.Items).ThenInclude(p => p.Product).FirstOrDefaultAsync(x => x.CustomerId == Request.Cookies["customerId"]);
 
-            if (cart == null) { return NotFound(); }
+            if (cart == null) { return BadRequest(new ProblemDetails { Title ="Product not found"}); }
 
             cart.RemoveItem(productId, quantity);
             var result = await _context.SaveChangesAsync() > 0;
