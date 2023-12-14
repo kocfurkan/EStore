@@ -16,7 +16,6 @@
     <Folder Include="src\app\util\" />
     <Folder Include="src\app\router\" />
     <Folder Include="src\assets\" />
-    <Folder Include="src\features\catalog\" />
     <Folder Include="src\features\about\" />
     <Folder Include="src\features\home\" />
     <Folder Include="src\features\cart\" />

@@ -17,6 +17,7 @@ export const store = configureStore({
 })
 
 //instead of using basic selector and dispatch we use custom hooks that returns our ones
+//It also provides type checking
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
