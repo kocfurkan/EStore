@@ -1,6 +1,7 @@
 ﻿using API.Data;
 using API.DTOs;
 using API.Entities;
+using API.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,37 +9,61 @@ namespace API.Controllers
 {
     public class CartController : BaseApiController
     {
-        private StoreContext _context;
+        private readonly StoreContext _context;
         public CartController(StoreContext context)
         {
             _context = context;
         }
-        [HttpGet(Name ="GetCart")]
-        public async Task<ActionResult<CartDto>> GetCart()
-        {
-            var cart = await _context.Carts.Include(i => i.Items).ThenInclude(p => p.Product).FirstOrDefaultAsync(x => x.CustomerId == Request.Cookies["customerId"]);
 
-            if (cart == null) { return NotFound(); }
-            return MapCartDto(cart);
+        private async Task<Cart> RetrieveCart(string customerId)
+        {
+            if (string.IsNullOrEmpty(customerId))
+            {
+                Response.Cookies.Delete("customerId");
+                return null;
+            }
+
+            return await _context.Carts
+                .Include(i => i.Items)
+                .ThenInclude(p => p.Product)
+                .FirstOrDefaultAsync(x => x.CustomerId == customerId);
         }
 
+        private string GetCustomerId()
+        {
+            return User.Identity.Name ?? Request.Cookies["customerId"];
+        }
+
+        [HttpGet(Name = "GetCart")]
+        public async Task<ActionResult<CartDto>> GetCart()
+        {
+            var cart = await RetrieveCart(GetCustomerId());
+
+            if (cart == null) { return NotFound(); }
+            return cart.MapCartToDto();
+        }
 
         [HttpPost]
-
         public async Task<ActionResult<CartDto>> AddItemToCart(int productId, int quantity)
         {
-            var cart = await _context.Carts.Include(i => i.Items).ThenInclude(p => p.Product).FirstOrDefaultAsync(x => x.CustomerId == Request.Cookies["customerId"]);
+            var cart = await RetrieveCart(GetCustomerId());
 
             if (cart == null)
             {
-                var customerId = Guid.NewGuid().ToString();
-
-                var cookieOptions = new CookieOptions
+                var customerId = User.Identity?.Name;
+                if (string.IsNullOrEmpty(customerId))
                 {
-                    IsEssential = true,
-                    Expires = DateTime.Now.AddDays(30),
-                };
-                Response.Cookies.Append("customerId", customerId, cookieOptions);
+                    customerId = Guid.NewGuid().ToString();
+
+                    var cookieOptions = new CookieOptions
+                    {
+                        IsEssential = true,
+                        Expires = DateTime.Now.AddDays(30),
+                    };
+                    Response.Cookies.Append("customerId", customerId, cookieOptions);
+                }
+
+
 
                 cart = new Cart { CustomerId = customerId };
 
@@ -54,7 +79,7 @@ namespace API.Controllers
             var result = await _context.SaveChangesAsync() > 0;
 
             if (result)
-                return CreatedAtRoute("GetCart", MapCartDto(cart));
+                return CreatedAtRoute("GetCart", cart.MapCartToDto());
 
             return BadRequest(new ProblemDetails { Title = "Problem saving item to basket" });
 
@@ -64,9 +89,9 @@ namespace API.Controllers
         public async Task<ActionResult> RemoveItemFromCart(int productId, int quantity)
         {
 
-            var cart = await _context.Carts.Include(i => i.Items).ThenInclude(p => p.Product).FirstOrDefaultAsync(x => x.CustomerId == Request.Cookies["customerId"]);
+            var cart = await RetrieveCart(GetCustomerId());
 
-            if (cart == null) { return BadRequest(new ProblemDetails { Title ="Product not found"}); }
+            if (cart == null) { return BadRequest(new ProblemDetails { Title = "Product not found" }); }
 
             cart.RemoveItem(productId, quantity);
             var result = await _context.SaveChangesAsync() > 0;
@@ -74,25 +99,7 @@ namespace API.Controllers
 
             return BadRequest(new ProblemDetails { Title = "Error removing the item." });
         }
-
-
-        private CartDto MapCartDto(Cart cart)
-        {
-            return new CartDto()
-            {
-                Id = cart.Id,
-                CustomerId = cart.CustomerId,
-                CartItems = cart.Items.Select(cartItem => new CartItemDto
-                {
-                    ProductId = cartItem.ProductId,
-                    Name = cartItem.Product.Name,
-                    Brand = cartItem.Product.Brand,
-                    Price = cartItem.Product.Price,
-                    Quantity = cartItem.Quantity,
-                    PictureUrl = cartItem.Product.ImageUrl,
-                    Type = cartItem.Product.Type,
-                }).ToList(),
-            };
-        }
     }
+
 }
+

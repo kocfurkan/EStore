@@ -1,0 +1,11 @@
+{
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "driver": "SQLite",
+      "database": "${workspaceFolder:EStore}/API/stor.db",
+      "name": "sql"
+    }
+  ],
+  "sqltools.useNodeRuntime": true
+}

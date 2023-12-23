@@ -9,23 +9,34 @@ import NotFound from "../errors/NotFound";
 import CartPage from "../../features/cart/CartPage";
 import CheckoutPage from "../../features/checkout/CheckoutPage";
 import ContactPage from "../../features/contact/ContactPage";
+import Login from "../../features/account/Login";
+import Register from "../../features/account/Register";
+import RequireAuth from "./RequireAuth";
 
 export const router = createBrowserRouter([
-    {
-        path: '/',
-        element: <App />,
-        children: [
-            { path: '', element: <HomePage></HomePage> },
-            { path: 'catalog', element: <Catalog></Catalog> },
-            { path: 'catalog/:id', element: <ProductDetails></ProductDetails> },
-            { path: 'about', element: <AboutPage></AboutPage> },
-            { path: 'contact', element: <ContactPage></ContactPage> },
-            { path: 'server-error', element: <ServerError></ServerError> },
-            { path: 'not-found', element: <NotFound></NotFound> },
-            { path: 'cart', element: <CartPage></CartPage> },
-            { path: 'checkout', element: <CheckoutPage></CheckoutPage> },
-            { path: '*', element: <Navigate replace to='/not-found'></Navigate> }
+  {
+    path: "/",
+    element: <App />,
 
-        ]
-    }
-])
+    //UI Auth protected pages
+    children: [
+      {
+        element: <RequireAuth></RequireAuth>,
+        children: [
+          { path: "checkout", element: <CheckoutPage></CheckoutPage> },
+        ],
+      },
+      { path: "", element: <HomePage></HomePage> },
+      { path: "catalog", element: <Catalog></Catalog> },
+      { path: "catalog/:id", element: <ProductDetails></ProductDetails> },
+      { path: "about", element: <AboutPage></AboutPage> },
+      { path: "contact", element: <ContactPage></ContactPage> },
+      { path: "server-error", element: <ServerError></ServerError> },
+      { path: "not-found", element: <NotFound></NotFound> },
+      { path: "cart", element: <CartPage></CartPage> },
+      { path: "login", element: <Login></Login> },
+      { path: "register", element: <Register></Register> },
+      { path: "*", element: <Navigate replace to="/not-found"></Navigate> },
+    ],
+  },
+]);
