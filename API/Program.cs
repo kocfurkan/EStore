@@ -50,7 +50,7 @@ builder.Services.AddIdentityCore<User>(opt =>
 {
     opt.User.RequireUniqueEmail = true;
 })
-    .AddRoles<IdentityRole>()
+    .AddRoles<Role>()
     .AddEntityFrameworkStores<StoreContext>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
@@ -74,7 +74,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     //Persist the authentication
-    app.UseSwaggerUI(c=>
+    app.UseSwaggerUI(c =>
     {
         c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
     });
