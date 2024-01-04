@@ -3,7 +3,6 @@ import { toast } from "react-toastify";
 import { router } from "../router/Routes";
 import { PaginatedResponse } from "../models/pagination";
 import { store } from "../store/configureStore";
-import { Token } from "@mui/icons-material";
 
 // Test purpose delay for loading component
 const delay = () => new Promise((resolve) => setTimeout(resolve, 500));
@@ -99,12 +98,21 @@ const Account = {
   login: (values: any) => requests.post("account/login", values),
   register: (values: any) => requests.post("account/register", values),
   currentUser: () => requests.get("account/currentUser"),
+  fetchAddress: () => requests.get("account/savedAddress"),
 };
+
+const Orders = {
+  list: () => requests.get("orders"),
+  fetch: (id: number) => requests.get(`orders/${id}`),
+  create: (values: any) => requests.post(`orders`, values),
+};
+
 const agent = {
   TestErrors,
   Catalog,
   Cart,
   Account,
+  Orders,
 };
 
 export default agent;
