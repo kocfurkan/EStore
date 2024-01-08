@@ -5,9 +5,11 @@
         public int Id { get; set; }
         public string CustomerId { get; set; }
         public List<CartItem> Items { get; set; } = new List<CartItem>();
+        public string PaymentIntentId { get; set; }
+        public string ClientSecret { get; set; }
         public void AddItemToCart(Product product, int quantity)
         {
-            if (Items.All(item=> item.ProductId != product.Id))
+            if (Items.All(item => item.ProductId != product.Id))
             {
                 Items.Add(new CartItem()
                 {
@@ -16,9 +18,9 @@
                     CartId = Id
                 });
 
-         
+
             }
-            var existingItem = Items.FirstOrDefault(item => item.ProductId== product.Id);
+            var existingItem = Items.FirstOrDefault(item => item.ProductId == product.Id);
             if (existingItem != null)
             {
                 existingItem.Quantity += quantity;

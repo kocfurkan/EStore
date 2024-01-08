@@ -8,9 +8,8 @@ interface Props extends UseControllerProps {
 
 export default function AppCheckbox(props: Props) {
   const { field } = useController({ ...props, defaultValue: false });
+
   return (
-    //The Checkbox is the actual input control.
-    //The FormControlLabel is used to associate a label (props.label) with the checkbox and provides additional styling options.
     <FormControlLabel
       control={
         <Checkbox
@@ -18,9 +17,9 @@ export default function AppCheckbox(props: Props) {
           checked={field.value}
           color="secondary"
           disabled={props.disabled}
-        ></Checkbox>
+        />
       }
       label={props.label}
-    ></FormControlLabel>
+    />
   );
 }

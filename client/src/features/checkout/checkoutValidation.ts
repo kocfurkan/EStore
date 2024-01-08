@@ -1,11 +1,10 @@
 import * as yup from "yup";
 
-export const validationSchme = [
-  //Even though not validating the review component we should add an empty yup object to it.
+export const validationSchema = [
   yup.object({
     fullName: yup.string().required("Full name is required"),
-    address1: yup.string().required("Address 1 is required"),
-    address2: yup.string().required("Address 2 is required"),
+    address1: yup.string().required("Addres line 1 is required"),
+    address2: yup.string().required(),
     city: yup.string().required(),
     state: yup.string().required(),
     zip: yup.string().required(),

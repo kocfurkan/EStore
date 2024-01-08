@@ -104,6 +104,8 @@ export const cartSlice = createSlice({
         state.status = "idle";
       }
     );
+    // The isAnyOf function is used to create a matcher that checks if the dispatched action is of type addCartItemAsync.fulfilled or getCartAsync.fulfilled.
+    // If the matcher returns true (meaning one of the specified actions is dispatched), the callback function is executed.
     builder.addMatcher(
       isAnyOf(addCartItemAsync.rejected, getCartAsync.rejected),
       (state, action) => {

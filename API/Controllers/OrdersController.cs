@@ -79,7 +79,8 @@ namespace API.Controllers
                 CustomerId = User.Identity.Name,
                 ShippingAddress = orderDto.ShippingAddress,
                 DeliveryFee = deliveryFee,
-                SubTotal = subTotal
+                SubTotal = subTotal,
+                PaymentIntentId = cart.PaymentIntentId
             };
 
             await _context.Orders.AddAsync(order);
