@@ -6,7 +6,7 @@ import {
 } from "@mui/material";
 import TopBar from "./TopBar";
 import { useCallback, useEffect, useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -14,8 +14,10 @@ import LoadingComponent from "./LoadingComponent";
 import { useAppDispatch } from "../store/configureStore";
 import { getCartAsync } from "../../features/cart/cartSlice";
 import { getCurrentUser } from "../../features/account/accountSlice";
+import HomePage from "../../features/home/HomePage";
 
 function App() {
+  const location = useLocation();
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(true);
 
@@ -46,7 +48,6 @@ function App() {
     setDarkMode(!darkMode);
   }
 
-  if (loading) return <LoadingComponent message="Loading"></LoadingComponent>;
   return (
     <>
       <ThemeProvider theme={theme}>
@@ -57,9 +58,15 @@ function App() {
         />
         <CssBaseline></CssBaseline>
         <TopBar darkMode={darkMode} themeChange={handleThemeChange}></TopBar>
-        <Container>
-          <Outlet></Outlet>
-        </Container>
+        {loading ? (
+          <LoadingComponent message="Loading"></LoadingComponent>
+        ) : location.pathname === "/" ? (
+          <HomePage />
+        ) : (
+          <Container sx={{ mt: 4 }}>
+            <Outlet></Outlet>
+          </Container>
+        )}
       </ThemeProvider>
     </>
   );

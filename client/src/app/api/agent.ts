@@ -7,7 +7,7 @@ import { store } from "../store/configureStore";
 // Test purpose delay for loading component
 const delay = () => new Promise((resolve) => setTimeout(resolve, 500));
 
-axios.defaults.baseURL = "http://localhost:5000/api/";
+axios.defaults.baseURL = import.meta.env.VITE_REACT_APP_API_URL;
 axios.defaults.withCredentials = true;
 
 const responseBody = (response: AxiosResponse) => response.data;
@@ -21,7 +21,7 @@ axios.interceptors.request.use((config) => {
 
 axios.interceptors.response.use(
   async (response) => {
-    await delay();
+    if (import.meta.env.MODE === "development") await delay();
 
     const pagination = response.headers["pagination"];
 
