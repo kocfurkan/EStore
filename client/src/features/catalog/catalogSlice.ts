@@ -2,11 +2,13 @@ import {
   createAsyncThunk,
   createEntityAdapter,
   createSlice,
+  isAction,
 } from "@reduxjs/toolkit";
 import { Product, ProductParams } from "../../app/models/product";
 import agent from "../../app/api/agent";
 import { RootState } from "../../app/store/configureStore";
 import { MetaData } from "../../app/models/pagination";
+import { stat } from "fs";
 
 //If Id's name is different then Id PorductId per se = >
 //const productsAdapter = createEntityAdapter<Product>({
@@ -120,6 +122,14 @@ export const catalogSlice = createSlice({
     resetProductParams: (state) => {
       state.productParams = initParams();
     },
+    setProduct: (state, action) => {
+      productsAdapter.upsertOne(state, action.payload);
+      state.productsLoaded = false;
+    },
+    removeProduct: (state, action) => {
+      productsAdapter.removeOne(state, action.payload);
+      state.productsLoaded = false;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchProductsAsync.pending, (state) => {
@@ -169,4 +179,6 @@ export const {
   resetProductParams,
   setMetaData,
   setPageNumber,
+  setProduct,
+  removeProduct,
 } = catalogSlice.actions;
