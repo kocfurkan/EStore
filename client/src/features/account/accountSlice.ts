@@ -29,7 +29,7 @@ export const logInUser = createAsyncThunk<User, FieldValues>(
       localStorage.setItem("user", JSON.stringify(user));
 
       return user;
-    } catch (error: Any) {
+    } catch (error: any) {
       return thunkAPI.rejectWithValue({ error: error.data });
     }
   }
@@ -50,7 +50,7 @@ export const getCurrentUser = createAsyncThunk<User>(
       localStorage.setItem("user", JSON.stringify(user));
 
       return user;
-    } catch (error: Any) {
+    } catch (error: any) {
       return thunkAPI.rejectWithValue({ error: error.data });
     }
   },
@@ -74,7 +74,13 @@ export const accountSlice = createSlice({
       router.navigate("/");
     },
     setUser: (state, action) => {
-      state.user = action.payload;
+      let claims = JSON.parse(atob(action.payload.token.split(".")[1]));
+      let roles =
+        claims["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+      state.user = {
+        ...action.payload,
+        roles: typeof roles === "string" ? [roles] : roles,
+      };
     },
   },
   extraReducers: (builder) => {
@@ -87,7 +93,16 @@ export const accountSlice = createSlice({
     builder.addMatcher(
       isAnyOf(logInUser.fulfilled, getCurrentUser.fulfilled),
       (state, action) => {
-        state.user = action.payload;
+        //this part gets roles from the JWT
+        let claims = JSON.parse(atob(action.payload.token.split(".")[1]));
+        let roles =
+          claims[
+            "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+          ];
+        state.user = {
+          ...action.payload,
+          roles: typeof roles === "string" ? [roles] : roles,
+        };
       }
     );
     builder.addMatcher(isAnyOf(logInUser.rejected), (state, action) => {
